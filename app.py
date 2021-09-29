@@ -26,7 +26,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.route('/')
 def home():
-    return 'А тут нічого!'
+    return 'А тут нічого!, Модель знаходиться: api/v1/items'
 
 
 @app.route('/api/v1/items', methods=['GET'])
@@ -92,6 +92,7 @@ def delete_list(item_id):
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     session.remove()
+
 
 
 if __name__ == '__main__':
