@@ -15,36 +15,13 @@ engine = create_engine('sqlite:///db.sqlite')
 session = scoped_session(sessionmaker(
     autocommit=False, autoflush=False, bind=engine))
 
+
 Base = declarative_base()
 Base.query = session.query_property()
-
-jwt = JWTManager(app)
 
 from models import *
 
 Base.metadata.create_all(bind=engine)
-
-
-
-items = [
-    {
-        'id': 1,
-        'title': u'Buy groceries',
-        'usd_price': u'500',
-        'city': u'home',
-        'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
-        'done': False
-    },
-    {
-        'id': 2,
-        'title': u'Learn Python',
-        'usd_price': u'1000',
-        'city': u'home',
-        'description': u'Need to find a good Python tutorial on the web',
-        'done': False
-    }
-]
-
 
 
 @app.route('/')

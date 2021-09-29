@@ -77,8 +77,7 @@ def parse():
 			save_file(cars, FILE)
 		
 		print(f'Найдено {len(cars)} машин')
-		
- 		print(cars)
+# 		print(cars)
 		
 #		conn = sqlite3.connect('parsdb.db')
 #		cursor = conn.cursor()
