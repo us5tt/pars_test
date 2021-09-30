@@ -36,7 +36,6 @@ def get_pages_count(html):
 def get_content(html):
 	soup = BeautifulSoup(html, 'html.parser')
 	items = soup.find_all('a', class_='proposition_link')
-	#    print(items)
 	
 	cars = []
 	for item in items:
@@ -48,6 +47,14 @@ def get_content(html):
 				#'link': item.find('section', class_='proposition').find('a', class_='proposition_link').get('href'),
 				}
 			)
+#	print(cars)
+#	conn = sqlite3.connect('parsdb.db')
+#	cursor = conn.cursor()
+	
+#	cursor.executemany('INSERT INTO parsetitems(title, usb_price, city, description) VALUES (?, ?, ?, ?)',
+#	cars)
+#	conn.commit()
+#	conn.close()
 	
 	return cars
 
@@ -58,7 +65,6 @@ def save_file(items, path):
 		writer.writerow(['Марка', 'Ціна в $', 'Місто'])
 		for item in items:
 			writer.writerow([item['title'], item['usd_price'], item['city']])
-
 
 def parse():
 	URL = input('Введіть URL: ')
@@ -77,14 +83,7 @@ def parse():
 			save_file(cars, FILE)
 		
 		print(f'Найдено {len(cars)} машин')
-# 		print(cars)
-		
-#		conn = sqlite3.connect('parsdb.db')
-#		cursor = conn.cursor()
-		
-#		cursor.executemany('INSERT INTO parsetitems(title, usb_price, city, description) VALUES (?, ?, ?, ?)', cars)
-#		conn.commit()
-#		conn.close()
+
 		
 	else:
 		print('Error')
