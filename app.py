@@ -46,9 +46,12 @@ def get_list():
     return jsonify(serialized)
 
 
-@bp.route('/api/v1/items/<int:item_id>', methods=['GET'])
-def get_list_id(id):
-    pass
+@app.route('/api/v1/items/<int:item_id>', methods=['GET'])
+def get_list_id(item_id):
+    item = filter(lambda t: t['id'] == item_id, items)
+    if len(item) == 0:
+        abort(404)
+    return jsonify({'item': item[0]})
 
 
 @app.route('/api/v1/items', methods=['POST'])
