@@ -46,6 +46,11 @@ def get_list():
     return jsonify(serialized)
 
 
+@bp.route('/api/v1/items/<int:item_id>', methods=['GET'])
+def get_list_id(id):
+    pass
+
+
 @app.route('/api/v1/items', methods=['POST'])
 def create_list():
     new_one = Parseritem(**request.json)
@@ -66,7 +71,7 @@ def update_list(item_id):
     item = Parseritem.query.filter(Parseritem.id == item_id).first()
     params = request.json
     if not item:
-        return {'message': 'No tutorials with this id'}, 400
+        return {'message': 'No parseritems with this id'}, 400
     for key, value in params.items():
         setattr(item, key, value)
     session.commit()
@@ -83,7 +88,7 @@ def update_list(item_id):
 def delete_list(item_id):
     item = Parseritem.query.filter(Parseritem.id == item_id).first()
     if not item:
-        return {'message': 'No parseritemss with this id'}, 400
+        return {'message': 'No parseritems with this id'}, 400
     session.delete(item)
     session.commit()
     return '', 204

@@ -47,7 +47,7 @@ def get_content(html):
 				#'link': item.find('section', class_='proposition').find('a', class_='proposition_link').get('href'),
 				}
 			)
-#	print(cars)
+#   	print(cars)
 #	conn = sqlite3.connect('parsdb.db')
 #	cursor = conn.cursor()
 	
