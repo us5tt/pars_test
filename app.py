@@ -3,7 +3,11 @@ import sqlalchemy as db
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from flask_jwt_extended import JWTManager
+from apispec.ext.marshmallow import MarshmallowPlugin
+from apispec import APISpec
+from flask_apispec.extension import FlaskApiSpec
+from schemas import ParsSchema
+from flask_apispec import use_kwargs, marshal_with
 
 
 app = Flask(__name__)
@@ -19,6 +23,21 @@ session = scoped_session(sessionmaker(
 Base = declarative_base()
 Base.query = session.query_property()
 
+docs = FlaskApiSpec()
+
+docs.init_app(app)
+
+app.config.update({
+    'APISPEC_SPEC': APISpec(
+        title='parseritems',
+        version='v1',
+        openapi_version='2.0',
+        plugins=[MarshmallowPlugin()],
+    ),
+    'APISPEC_SWAGGER_URL': '/swagger/'
+})
+
+
 from models import *
 
 Base.metadata.create_all(bind=engine)
@@ -30,68 +49,53 @@ def home():
 
 
 @app.route('/api/v1/items', methods=['GET'])
+@marshal_with(ParsSchema(many=True))
 def get_list():
-    parseritems = Parseritem.query.all()
-    serialized = []
-    for parseritem in parseritems:
-        serialized.append(
-                    {
-                        'id': parseritem.id,
-                        'title': parseritem.title,
-                        'usd_price': parseritem.usd_price,
-                        'city': parseritem.city,
-                        'description': parseritem.description
-                        }
-                    )
-    return jsonify(serialized)
+    parseitems = Parseritem.query.all()
+    return parseitems
 
 
 @app.route('/api/v1/items/<int:item_id>', methods=['GET'])
-def get_list_id(item_id):
-    item = filter(lambda t: t['id'] == item_id, items)
-    if len(item) == 0:
-        abort(404)
-    return jsonify({'item': item[0]})
+@marshal_with(ParsSchema)
+def get_id(item_id):
+    item = Parseritem.query.filter(Parseritem.id == item_id).first()
+    if not item:
+        return {'message': 'No parseritem with this id'}, 400
+    session.commit()
+    return 'good', 204
 
 
 @app.route('/api/v1/items', methods=['POST'])
-def create_list():
-    new_one = Parseritem(**request.json)
+@use_kwargs(ParsSchema)
+@marshal_with(ParsSchema)
+def create_list(**kwargs):
+    new_one = Parseritem(**kwargs)
+    session.commit()
     session.add(new_one)
     session.commit()
-    serialized = {
-        'id': new_one.id,
-        'title': new_one.title,
-        'usd_price': new_one.usd_price,
-        'city': new_one.city,
-        'description': new_one.description
-        }
-    return jsonify(serialized)
+    return new_one
 
 
 @app.route('/api/v1/items/<int:item_id>', methods=['PUT'])
-def update_list(item_id):
+@use_kwargs(ParsSchema)
+@marshal_with(ParsSchema)
+def update_list(item_id, **kwargs):
     item = Parseritem.query.filter(Parseritem.id == item_id).first()
     params = request.json
     if not item:
-        return {'message': 'No parseritems with this id'}, 400
-    for key, value in params.items():
+        return {'message': 'No parseitems with this id'}, 400
+    for key, value in kwargs.items():
         setattr(item, key, value)
     session.commit()
-    serialized = {
-        'id': item.id,
-        'title': item.title,
-        'usd_price': item.usd_price,
-        'city': item.city,
-        'description': item.description
-        }
+    return item
 
 
 @app.route('/api/v1/items/<int:item_id>', methods=['DELETE'])
+@marshal_with(ParsSchema)
 def delete_list(item_id):
     item = Parseritem.query.filter(Parseritem.id == item_id).first()
     if not item:
-        return {'message': 'No parseritems with this id'}, 400
+        return {'message': 'No parseitems with this id'}, 400
     session.delete(item)
     session.commit()
     return '', 204
@@ -100,6 +104,13 @@ def delete_list(item_id):
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     session.remove()
+
+
+docs.register(get_list)
+docs.register(get_id)
+docs.register(create_list)
+docs.register(update_list)
+docs.register(delete_list)
 
 
 
