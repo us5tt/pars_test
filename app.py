@@ -29,7 +29,7 @@ docs.init_app(app)
 
 app.config.update({
     'APISPEC_SPEC': APISpec(
-        title='parseritems',
+        title='parseitems',
         version='v1',
         openapi_version='2.0',
         plugins=[MarshmallowPlugin()],
